@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title> Library Home </title>
+{% endblock %}
+
+{% block content %}
+    <h1>Local Library Home</h1>
+    <p>Welcome to local library, a website developed by JK</p>
+    <h2>Current records</h2>
+    <p>The library has following record counts: </p>
+    <ul>
+        <li><strong>Books: </strong> {{ num_books }} </li>
+        <li><strong>Copies of Books: </strong> {{ num_book_instances }} </li>
+        <li><strong>Copies available: </strong> {{ num_instances_available }} </li>
+        <li><strong>Authors: </strong> {{ num_authors }} </li>
+        <li><strong>Most Borrowed book: </strong> {{ most_borrowed }}   </li>
+        <li><strong>Books containing 'game'</strong>
+            <ul>
+                {% for i in titles_with_game  %}
+                    <li> {{ i.title }} </li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 import datetime
+from django.urls import reverse
 #from django.core.validators import MaxValueValidator, MinValueValidator
 
 #year Validators
@@ -34,8 +35,12 @@ class Book(models.Model):
 	def display_genre(self):
 		"""Create a string for the Genre. This is required to display genre in Admin."""
 		return ', '.join(genre.name for genre in self.genre.all()[:3])
+	def display_lang(self):
+		"""Create a string for the language. This is required to display language in Admin."""
+		return ', '.join(language.name for language in self.language.all())
 
 	display_genre.short_desciption = 'Genre'
+	display_lang.short_desciption = 'Language'
 	#field for maintaining multiple copies of a single book in Library
 	#available_count = models.IntegerField(default=1)
 
@@ -45,7 +50,7 @@ class Book(models.Model):
 	# Methods
 	def get_absolute_url(self):
 		"""Returns the url to access a particular instance of MyModelName."""
-		return reverse('model-detail-view', args=[str(self.id)])
+		return reverse('book-detail', args=[str(self.id)])
 	def __str__(self):
 		"""String for representing the MyModelName object (in Admin site etc.)."""
 		return self.title
@@ -90,6 +95,16 @@ class BookInstance(models.Model):
 	"""String for representing the Model object."""	
 	def __str__(self):
 		return '{0} ({1})'.format(self.bk_id,self.book.title)
+	def get_status_display(self):
+		if self.status == 'a':
+			return 'Available'
+		elif self.status == 'm':
+			return 'Maintenance'
+		elif self.status == 'o':
+			return 'On loan'
+		elif self.status == 'r':
+			return 'Reserved'
+
 
 
 class Author(models.Model):
