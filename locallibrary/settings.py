@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'YOUR SECRET KEY' # add secret key 
+SECRET_KEY = '=&6pf1r55r1!ul($!+krbp*w9jx0her5l_@!9r4j95u&5my))g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,7 +55,9 @@ ROOT_URLCONF = 'locallibrary.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,9 +79,9 @@ WSGI_APPLICATION = 'locallibrary.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'DATABASE_NAME', #add DB name here
-        'USER': 'DATABSE_USER', #add DB username here
-        'PASSWORD': 'DATABASE_PASSWORD', #add DB pwd here
+        'NAME': 'locallibrary',
+        'USER': 'locallibrary-user',
+        'PASSWORD': 'joelkinny',
         'HOST': 'localhost',
         'PORT': '5432',
     }
