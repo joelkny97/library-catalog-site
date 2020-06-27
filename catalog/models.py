@@ -2,12 +2,17 @@ from django.db import models
 import uuid
 import datetime
 from django.urls import reverse
-#from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.text import slugify
+from django.conf import settings
 
-#year Validators
+
+# from django.core.validators import MaxValueValidator, MinValueValidator
+
+# year Validators
 
 def max_year_current(value):
 	return MaxValueValidator(datetime.date.today().year)(value)
+
 
 # Create your models here.
 
@@ -125,5 +130,3 @@ class Author(models.Model):
 	def __str__(self):
 		"""String for representing the Model object."""
 		return '{0}, {1}'.format(self.firstname, self.lastname)
-
-

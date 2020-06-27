@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.db.models import Max, Count
 from django.views import generic
+
 
 # Create your views here.
 from catalog.models import Book, BookInstance, Author, Genre, Language
@@ -79,6 +80,4 @@ class AuthorListView(generic.ListView):
 class AuthorDetailView(generic.DetailView):
     model = Author
     template_name = 'catalog/author_detail.html'
-
-
-
+    query_pk_and_slug = True  # calling pk and slug
