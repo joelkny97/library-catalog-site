@@ -20,7 +20,10 @@ def index(request):
 
     #most borrowed books
     max_book_count = BookInstance.objects.values('book__title').annotate(num_inst=Count('book__id')).order_by('-num_inst')[0]
-    most_borrowed = max_book_count['book__title']
+    if BookInstance.objects.all().count() != 0:
+        most_borrowed = max_book_count['book__title']
+    else:
+        most_borrowed = 'None'
 
     #title search - the
     titles_with_game = Book.objects.filter(title__icontains='game')
@@ -62,6 +65,7 @@ class BookDetailView(generic.DetailView):
 #class view to generate list view of all authors
 class AuthorListView(generic.ListView):
     model = Author
+    # query_pk_and_slug = True
     pagination = 10
     #context_object_name = 'my_book_list' #custom name for list as template variable
     template_name = 'catalog/author_list.html' #custom template file
@@ -70,14 +74,15 @@ class AuthorListView(generic.ListView):
         return Author.objects.all()  #return 5 books in list view
 
     def get_context_data(self, **kwargs):
-        #call base implementation first to get context
+        # call base implementation first to get context
         context = super(AuthorListView, self).get_context_data(**kwargs)
 
-        #creating some custom data to be added
+        # creating some custom data to be added
         context['some_data'] = 'some data'
         return context
+
 
 class AuthorDetailView(generic.DetailView):
     model = Author
     template_name = 'catalog/author_detail.html'
-    query_pk_and_slug = True  # calling pk and slug
+    #query_pk_and_slug = True  # calling pk and slug

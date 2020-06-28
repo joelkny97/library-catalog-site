@@ -119,14 +119,23 @@ class Author(models.Model):
 	lastname = models.CharField(max_length=100, help_text='Enter Author\'s last name')
 	date_of_birth = models.DateField(null=True,blank=True)
 	date_of_death = models.DateField('Died', null=True, blank=True)
+	slug = models.SlugField(null=False,unique=True, blank=True,allow_unicode=True)
 
 	class Meta:
 		ordering = ['lastname', 'firstname']
 
 	def get_absolute_url(self):
 		"""Returns the url to access a particular author instance."""
-		return reverse('author-detail', args=[str(self.id)])
+		return reverse('author-detail', kwargs={'slug': self.slug})
 
 	def __str__(self):
 		"""String for representing the Model object."""
 		return '{0}, {1}'.format(self.firstname, self.lastname)
+
+	def save(self, *args, **kwargs):  # new
+		super(Author,self).save(*args, **kwargs)  # Save your model in order to get the id
+		if not self.slug:
+			self.slug = slugify(self.firstname,self.lastname)+"-"+str(self.id)
+		return super().save(*args, **kwargs)
+
+

@@ -8,9 +8,5 @@ class Migration(migrations.Migration):
         ('catalog', '0006_auto_20200614_2306'),
     ]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='book',
-            name='published_year',
-        ),
-    ]
+    
+    
