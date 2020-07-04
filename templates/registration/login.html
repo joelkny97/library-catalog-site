@@ -1,0 +1,39 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Local Library Login</h1>
+    <p>Welcome to local library, a website developed by JK</p>
+
+    {% if forms.error %}
+    <p>Your username or password didn't match. Please try again and user correct credentials</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+        <p>Your account does not have access to this page. Please login with an authenticated account.</p>
+        {% else %}
+        <p>Please login to see this page.</p>
+        {% endif %}
+    {% endif %}
+
+    <form method = "post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td> {{ form.username.label_tag }}</td>
+                <td> {{ form.username }} </td>
+            </tr>
+            <tr>
+                <td> {{ form.password.label_tag }} </td>
+                <td> {{ form.password }} </td>
+            </tr>
+        </table>
+        <input type = "submit" value="Login"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+
+    {# for password reset view mentioned in url mapper URLConf #}
+    <p><a href="{% url 'password_reset' %}">Forgot password ?</a> </p>
+
+{% endblock %}

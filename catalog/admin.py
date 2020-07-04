@@ -29,7 +29,8 @@ class BookInstanceInline(admin.TabularInline):
 @admin.register(Book)	
 
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title','author','display_genre')
+    prepopulated_fields = {'slug': ('title',),}
+    list_display = ('title','author','display_genre',)
     inlines = [BookInstanceInline]
 
 # Register the Admin classes for BookInstance using the decorator

@@ -33,7 +33,7 @@ class Book(models.Model):
 
 	# ManyToManyField used because lang can contain many books. Books can cover many languages.
 	language = models.ManyToManyField('Language', help_text='Enter a language for this book')
-
+	slug = models.SlugField(null=False, unique=True,blank=True, allow_unicode=True)
 
 	published_date = models.DateField('Published Date',null=True,blank=True,help_text='Enter published date for this book')
 
@@ -43,6 +43,20 @@ class Book(models.Model):
 	def display_lang(self):
 		"""Create a string for the language. This is required to display language in Admin."""
 		return ', '.join(language.name for language in self.language.all())
+
+	def _get_unique_slug(self):
+		slug = slugify(self.title)
+		unique_slug = slug
+		num = 1
+		while self.objects.filter(slug=unique_slug).exists():
+			unique_slug = '{}-{}'.format(slug, num)
+			num += 1
+		return unique_slug
+	def save(self, *args, **kwargs):  # new
+		#super(Book,self).save(*args, **kwargs)  # Save your model in order to get the id
+		if not self.slug:
+			self.slug = self._get_unique_slug()
+		return super().save(*args, **kwargs)
 
 	display_genre.short_desciption = 'Genre'
 	display_lang.short_desciption = 'Language'
@@ -55,7 +69,7 @@ class Book(models.Model):
 	# Methods
 	def get_absolute_url(self):
 		"""Returns the url to access a particular instance of MyModelName."""
-		return reverse('book-detail', args=[str(self.id)])
+		return reverse('book-detail', kwargs={'slug': self.slug})
 	def __str__(self):
 		"""String for representing the MyModelName object (in Admin site etc.)."""
 		return self.title
@@ -133,9 +147,9 @@ class Author(models.Model):
 		return '{0}, {1}'.format(self.firstname, self.lastname)
 
 	def save(self, *args, **kwargs):  # new
-		super(Author,self).save(*args, **kwargs)  # Save your model in order to get the id
+		#super(Author,self).save(*args, **kwargs)  # Save your model in order to get the id
 		if not self.slug:
-			self.slug = slugify(self.firstname,self.lastname)+"-"+str(self.id)
+			self.slug = slugify(self.firstname,self.lastname)
 		return super().save(*args, **kwargs)
 
 
