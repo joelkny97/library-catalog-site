@@ -9,45 +9,56 @@
     <link rel="stylesheet" href="{% static 'css/styles.css'  %}">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-2">
-                {% block sidebar %}
-                <nav class="nav flex-column grey lighten-4 py-4 font-weight-bold">
-                <ul class="sidebar-nav">
-                    {% if user.is_authenticated %}
-                    <li><a class="nav-link" href=" {% url 'index' %}">Home </a></li>
-                    <li><a class="nav-link" href="{% url 'books' %}">All Books</a></li>
-                    <li><a class="nav-link" href="{% url 'authors' %}">All Authors</a></li>
-                    <li><p class="nav-link"> User: {{ user.get_username }}</p></li>
-                    <li><a class="nav-link" href="{% url 'logout'%}">Logout</a></li>
-                    {% else %}
-                    <li><a class="nav-link" href="{% url 'login'%}?next={{request.path}}">Login</a></li>
-                    {% endif %}
-                </ul>
-                </nav>
-                {% endblock %}
-            </div>
-            <div class="col-md-10"> {% block content %}  {% endblock %}
-                {% block pagination %}
-                {% if is_paginated %}
-                <div class="pagination">
-                    <span class="page-links">
-                        {% if page_obj.has_previous %}
-                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
-                        {% endif %}
-                        <span class="page-current">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                        </span>
-                        {% if page_obj.has_next %}
-                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                        {% endif %}
-                    </span>
-                </div>
+<div id="wrapper">
+    <!-- Sidebar-->
+    <div id="sidebar-wrapper">
+        {% block sidebar %}
+        <nav class="nav flex-column grey lighten-4 py-4 font-weight-bold">
+            <ul class="sidebar-nav">
+                {% if user.is_authenticated %}
+                <li><a class="nav-link" href=" {% url 'index' %}">Home </a></li>
+                <li><a class="nav-link" href="{% url 'books' %}">All Books</a></li>
+                <li><a class="nav-link" href="{% url 'authors' %}">All Authors</a></li>
+                <li><p class="nav-link"> User: {{ user.get_username }}</p></li>
+                <li><a class="nav-link" href="{% url 'logout'%}">Logout</a></li>
+                {% else %}
+                <li><a class="nav-link"
+                       href="{% url 'login'%}?next={% if request.path == '/accounts/logout/' %}{% url 'index' %}{% else %}{{ request.path }}{% endif %}">Login</a>
+                </li>
                 {% endif %}
-                {% endblock %}
+            </ul>
+        </nav>
+        {% endblock %}
+
+    </div>
+    <!-- Page content-->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12"> {% block content %} {% endblock %}
+                    {% block pagination %}
+                    {% if is_paginated %}
+                    <div class="pagination">
+                            <span class="page-links">
+                            {% if page_obj.has_previous %}
+                                <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                            {% endif %}
+                            <span class="page-current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+                            {% if page_obj.has_next %}
+                                <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                            {% endif %}
+                            </span>
+                    </div>
+                    {% endif %}
+                    {% endblock %}
+
+                </div>
             </div>
         </div>
     </div>
+</div>
+
 </body>
 </html>

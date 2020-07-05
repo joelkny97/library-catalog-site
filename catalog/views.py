@@ -51,7 +51,7 @@ def index(request):
 #class view to generate list view of all books
 class BookListView(LoginRequiredMixin,generic.ListView):
     login_url = '/accounts/login/'
-    redirect_url = '/'
+    redirect_url = 'catalog/'
     model = Book
     pagination = 10
     paginate_by = 2
@@ -70,14 +70,14 @@ class BookListView(LoginRequiredMixin,generic.ListView):
         return context
 class BookDetailView(LoginRequiredMixin,generic.DetailView):
     login_url = '/accounts/login/'
-    redirect_url = '/'
+    redirect_url = 'catalog/'
     model = Book
     template_name = 'catalog/book_detail.html'  # custom template file
 
 #class view to generate list view of all authors
 class AuthorListView(LoginRequiredMixin,generic.ListView):
     login_url = '/accounts/login/'
-    redirect_url = '/'
+    redirect_url = 'catalog/'
     model = Author
     # query_pk_and_slug = True
     pagination = 10
@@ -98,7 +98,7 @@ class AuthorListView(LoginRequiredMixin,generic.ListView):
 
 class AuthorDetailView(LoginRequiredMixin,generic.DetailView):
     login_url = '/accounts/login/'
-    redirect_url = '/'
+    redirect_url = 'catalog/'
     model = Author
     template_name = 'catalog/author_detail.html'
     #query_pk_and_slug = True  # calling pk and slug
