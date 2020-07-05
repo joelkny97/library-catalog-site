@@ -1,11 +1,34 @@
+/*.col-md-2 {
+    background-color: aliceblue;
+}*/
+/* Sidebar */
+#sidebar-wrapper {
+    z-index: 1;
+    height: 100%;
+    width: 250px;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color: #2C3E50;
+    opacity: 0.9;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Main content */
+#page-content-wrapper {
+    height: 100%;
+    width: 100%;
+    padding-left: 250px;
+    position: absolute;
+}
+/* Sidebar styling */
 .sidebar-nav {
     margin-top: 20px;
     padding: 0;
     list-style: none;
 }
-.col-md-2 {
-    background-color: aliceblue;
-}
+
 
 
 
