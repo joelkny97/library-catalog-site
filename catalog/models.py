@@ -2,12 +2,19 @@ from django.db import models
 import uuid
 import datetime
 from django.urls import reverse
-#from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.text import slugify
+from django.conf import settings
+from django.contrib.auth.models import User
+from datetime import date
 
-#year Validators
+
+# from django.core.validators import MaxValueValidator, MinValueValidator
+
+# year Validators
 
 def max_year_current(value):
 	return MaxValueValidator(datetime.date.today().year)(value)
+
 
 # Create your models here.
 
@@ -28,7 +35,7 @@ class Book(models.Model):
 
 	# ManyToManyField used because lang can contain many books. Books can cover many languages.
 	language = models.ManyToManyField('Language', help_text='Enter a language for this book')
-
+	slug = models.SlugField(null=False, unique=True,blank=True, allow_unicode=True)
 
 	published_date = models.DateField('Published Date',null=True,blank=True,help_text='Enter published date for this book')
 
@@ -38,6 +45,20 @@ class Book(models.Model):
 	def display_lang(self):
 		"""Create a string for the language. This is required to display language in Admin."""
 		return ', '.join(language.name for language in self.language.all())
+
+	def _get_unique_slug(self):
+		slug = slugify(self.title)
+		unique_slug = slug
+		num = 1
+		while self.objects.filter(slug=unique_slug).exists():
+			unique_slug = '{}-{}'.format(slug, num)
+			num += 1
+		return unique_slug
+	def save(self, *args, **kwargs):  # new
+		#super(Book,self).save(*args, **kwargs)  # Save your model in order to get the id
+		if not self.slug:
+			self.slug = self._get_unique_slug()
+		return super().save(*args, **kwargs)
 
 	display_genre.short_desciption = 'Genre'
 	display_lang.short_desciption = 'Language'
@@ -50,7 +71,7 @@ class Book(models.Model):
 	# Methods
 	def get_absolute_url(self):
 		"""Returns the url to access a particular instance of MyModelName."""
-		return reverse('book-detail', args=[str(self.id)])
+		return reverse('book-detail', kwargs={'slug': self.slug})
 	def __str__(self):
 		"""String for representing the MyModelName object (in Admin site etc.)."""
 		return self.title
@@ -80,6 +101,13 @@ class BookInstance(models.Model):
 	book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True)
 	imprint = models.CharField(max_length=200)
 	due_back = models.DateField(null=True,blank=True)
+	borrower = models.ForeignKey(User,on_delete=models.SET_NULL, null=True, blank=True)
+
+	@property
+	def is_overdue(self):
+		if self.due_back and date.today() > self.due_back:
+			return True
+		return False
 
 	LOAN_STATUS = (
 		('m','Maintenance'),
@@ -91,6 +119,7 @@ class BookInstance(models.Model):
 
 	class Meta:
 		ordering = ['due_back']
+		permissions = (("can_mark_returned","Set book as returned"),("can_renew","Renew due date"))
 
 	"""String for representing the Model object."""	
 	def __str__(self):
@@ -105,8 +134,6 @@ class BookInstance(models.Model):
 		elif self.status == 'r':
 			return 'Reserved'
 
-
-
 class Author(models.Model):
 
 	#Fields 
@@ -114,16 +141,23 @@ class Author(models.Model):
 	lastname = models.CharField(max_length=100, help_text='Enter Author\'s last name')
 	date_of_birth = models.DateField(null=True,blank=True)
 	date_of_death = models.DateField('Died', null=True, blank=True)
+	slug = models.SlugField(null=False,unique=True, blank=True,allow_unicode=True)
 
 	class Meta:
 		ordering = ['lastname', 'firstname']
 
 	def get_absolute_url(self):
 		"""Returns the url to access a particular author instance."""
-		return reverse('author-detail', args=[str(self.id)])
+		return reverse('author-detail', kwargs={'slug': self.slug})
 
 	def __str__(self):
 		"""String for representing the Model object."""
 		return '{0}, {1}'.format(self.firstname, self.lastname)
+
+	def save(self, *args, **kwargs):  # new
+		#super(Author,self).save(*args, **kwargs)  # Save your model in order to get the id
+		if not self.slug:
+			self.slug = slugify(self.firstname,self.lastname)
+		return super().save(*args, **kwargs)
 
 
