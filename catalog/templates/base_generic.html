@@ -17,9 +17,14 @@
             <ul class="sidebar-nav">
                 {% if user.is_authenticated %}
                 <li><a class="nav-link" href=" {% url 'index' %}">Home </a></li>
+
                 <li><a class="nav-link" href="{% url 'books' %}">All Books</a></li>
                 <li><a class="nav-link" href="{% url 'authors' %}">All Authors</a></li>
                 <li><p class="nav-link"> User: {{ user.get_username }}</p></li>
+                {% if perms.catalog.can_mark_returned %}
+                    <li><a class="nav-link" href="{% url 'users-borrowed' %}">User Borrowed books</a></li>
+                {% endif %}
+                <li><a class="nav-link" href="{% url 'my-borrowed' %}">My Borrowed books</a></li>
                 <li><a class="nav-link" href="{% url 'logout'%}">Logout</a></li>
                 {% else %}
                 <li><a class="nav-link"
