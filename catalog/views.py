@@ -7,16 +7,19 @@ from django.contrib.auth.decorators import permission_required
 import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from catalog.forms import RenewBookForm
+from catalog.forms import RenewReturnBookModelForm
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
 # Create your views here.
 from catalog.models import Book, BookInstance, Author, Genre, Language
+
 
 @login_required
 def index(request):
     """View function for home page"""
 
-    #Number of visits to this view
+    # Number of visits to this view
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
 
@@ -29,7 +32,7 @@ def index(request):
 
     num_authors = Author.objects.all().count()
 
-    #most borrowed books
+    #most borrowed books (needs to be changed)
     max_book_count = BookInstance.objects.values('book__title').annotate(num_inst=Count('book__id')).order_by('-num_inst')[0]
     if BookInstance.objects.all().count() != 0:
         most_borrowed = max_book_count['book__title']
@@ -111,7 +114,7 @@ class AuthorDetailView(LoginRequiredMixin,generic.DetailView):
 class LoanBooksByUserListView(LoginRequiredMixin,generic.ListView):
     """Generic class-based view listing all loaned books by current user"""
     model = BookInstance
-    template_name = 'catalog/book_instance_list_borrowed_user.html'
+    template_name = 'catalog/bookinstance_list_borrowed_user.html'
     paginate_by = 10
     def get_queryset(self):
         return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact = 'o').order_by('due_back')
@@ -120,7 +123,7 @@ class LoanBooksByUserLibrariansListView(LoginRequiredMixin,generic.ListView):
     """Generic class-based view listing all loaned books by all users to display to librarains"""
     model=BookInstance
     permission_required = 'catalog.can_mark_returned'
-    template_name='catalog/book_instance_list_borrowed_librarian.html'
+    template_name = 'catalog/bookinstance_list_borrowed_librarian.html'
     paginate_by = 10
     def get_queryset(self):
         return BookInstance.objects.filter(status__exact = 'o').order_by('due_back')
@@ -132,23 +135,28 @@ def renew_book_librarian(request, pk):
     # If this is a POST request then process the Form data
     if request.method == 'POST':
         # Create a form instance and populate it with data from the request (binding)
-        form = RenewBookForm(request.POST)
+        form = RenewReturnBookModelForm(request.POST)
 
         #check if form is valid
         if form.is_valid():
-            #process the data in form.cleaned_data as required (here we just write to model due_back)
-            book_instance.due_back = form.cleaned_data['renewal_date']
-            book_instance.save()
+            # process the data in form.cleaned_data as required (here we just write to model due_back)
+            if form.cleaned_data['status'] == 'a':
+                book_instance.due_back = None
+                book_instance.borrower = None
+                book_instance.status = form.cleaned_data['status']
+                book_instance.save()
+            else:
+                book_instance.due_back = form.cleaned_data['due_back']
+                book_instance.save()
 
-            #redirect to new url after date is set
+            # redirect to new url after date is set
             return HttpResponseRedirect(reverse('users-borrowed'))
 
     #If this a GET or any other method, display initial default form
     else:
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
 
-        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
-
+        form = RenewReturnBookModelForm(initial={'due_back': proposed_renewal_date, }, )
 
     context = {
         'form': form,
@@ -158,8 +166,78 @@ def renew_book_librarian(request, pk):
     return render(request, 'catalog/book_renew_librarian.html', context)
 
 
+class BookInstanceCreate(LoginRequiredMixin, CreateView):
+    template_name = 'catalog/models_form.html'
+    model = BookInstance
+    fields = '__all__'
+    initial = {'due_back': datetime.date.today() + datetime.timedelta(weeks=3)}
+    success_url = reverse_lazy('librarian_manage')
 
 
+class BookInstanceUpdate(LoginRequiredMixin, UpdateView):
+    template_name = 'catalog/models_form.html'
+    model = BookInstance
+    fields = ['status', 'due_back', 'borrower']
+    initial = {'due_back': datetime.date.today() + datetime.timedelta(weeks=3)}
+    success_url = reverse_lazy('librarian_manage')
 
 
+class BookInstanceDelete(LoginRequiredMixin, DeleteView):
+    model = BookInstance
+    success_url = reverse_lazy('librarian_manage')
+    template_name = 'catalog/models_confirm_delete.html'
 
+
+class LibrariansManageListView(LoginRequiredMixin, generic.TemplateView):
+    """Generic class-based view listing all book instances to display to librarains"""
+    permission_required = 'catalog.can_mark_returned'
+    template_name = 'catalog/librarian_manage.html'
+    paginate_by = 2
+    pagination = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(LibrariansManageListView, self).get_context_data(**kwargs)
+        context['BookInstance'] = BookInstance.objects.all().order_by('book')
+        context['Book'] = Book.objects.all().order_by('title')
+        context['Author'] = Author.objects.all().order_by('firstname', 'lastname', 'date_of_birth')
+        return context
+
+
+class AuthorCreate(LoginRequiredMixin, CreateView):
+    template_name = 'catalog/models_form.html'
+    model = Author
+    fields = ['firstname', 'lastname', 'date_of_birth', 'date_of_death']
+    success_url = reverse_lazy('librarian_manage')
+
+
+class AuthorUpdate(LoginRequiredMixin, UpdateView):
+    template_name = 'catalog/models_form.html'
+    model = Author
+    fields = ['firstname', 'lastname', 'date_of_birth', 'date_of_death']
+    success_url = reverse_lazy('librarian_manage')
+
+
+class AuthorDelete(LoginRequiredMixin, DeleteView):
+    template_name = 'catalog/models_confirm_delete.html'
+    model = Author
+    success_url = reverse_lazy('librarian_manage')
+
+
+class BookCreate(LoginRequiredMixin, CreateView):
+    template_name = 'catalog/models_form.html'
+    model = Book
+    fields = '__all__'
+    success_url = reverse_lazy('librarian_manage')
+
+
+class BookUpdate(LoginRequiredMixin, UpdateView):
+    template_name = 'catalog/models_form.html'
+    model = Book
+    fields = '__all__'
+    success_url = reverse_lazy('librarian_manage')
+
+
+class BookDelete(LoginRequiredMixin, DeleteView):
+    template_name = 'catalog/models_confirm_delete.html'
+    model = Book
+    success_url = reverse_lazy('librarian_manage')

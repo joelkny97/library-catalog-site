@@ -1,0 +1,100 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<h1>Manage books/authors</h1>
+
+<h2>Book Instances</h2>
+
+<a href="{% url 'bookinstance_create' %}">Add a new book instance</a>
+
+{% if BookInstance %}
+<div class="row">
+    <div class="table-responsive table-body col-md-12">
+        <table class="table table-hover table-responsive table-striped" style="border:">
+            <tr>
+                <th>Book Title</th>
+                <th>Status</th>
+                <th>Borrower</th>
+                <th>Due Back</th>
+                <th>Edit</th>
+            </tr>
+            {% for bookinst in BookInstance %}
+            <tr class="{% if bookinst.is_overdue %}table-danger {% elif bookinst.status != 'a' %}table-warning  {% endif %}">
+                <td><a href="{% url 'book-detail' bookinst.book.slug %}">{{ bookinst.book.title }}</a></td>
+                <td class="{% if bookinst.is_overdue %}text-danger {% endif %}"> {% if bookinst.is_overdue %} Overdue {%
+                    else %} {{ bookinst.get_status_display }} {% endif %}
+                </td>
+                <td>{{ bookinst.borrower }}</td>
+                <td> {{ bookinst.due_back }}</td>
+                <td><a href="{% url 'bookinstance_update' bookinst.bk_id %}">Update</a> &nbsp; <a class="text-danger"
+                                                                                                  href="{% url 'bookinstance_delete' bookinst.bk_id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% else %}
+<p>There are no books to be displayed</p>
+{% endif %}
+
+<h2>Authors</h2>
+
+<a href="{% url 'author_create' %}">Add a new author</a>
+
+{% if Author %}
+<div class="table-responsive table-body">
+    <table class="table table-hover table-responsive table-striped" style="border:">
+        <tr>
+            <th>Full Name</th>
+            <th>Date of Birth</th>
+            <th>Date of Death</th>
+            <th>Edit</th>
+        </tr>
+        {% for author in Author %}
+        <tr>
+            <td><a href="{% url 'author-detail' author.slug %}">{{ author.firstname }} {{ author.lastname }} </a></td>
+            <td> {{ author.date_of_birth }}</td>
+            <td>{{ author.date_of_death }}</td>
+            <td><a href="{% url 'author_update' author.slug %}">Update</a> &nbsp; <a class="text-danger"
+                                                                                     href="{% url 'author_delete' author.slug %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% else %}
+<p>There are no authors to be displayed</p>
+{% endif %}
+
+<h2>Books</h2>
+
+<a href="{% url 'book_create' %}">Add a new book</a>
+
+{% if Book %}
+<div class="table-responsive table-body">
+    <table class="table table-hover table-responsive table-striped" style="border:">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Edit</th>
+        </tr>
+        {% for book in Book %}
+        <tr>
+            <td><a href="{% url 'book-detail' book.slug %}">{{ book.title }} </a></td>
+            <td><a href="{% url 'author-detail' book.author.slug %}"> {{ book.author }} </a></td>
+            <td>{{ book.isbn }}</td>
+            <td><a href="{% url 'book_update' book.slug %}">Update</a> &nbsp; <a class="text-danger"
+                                                                                 href="{% url 'book_delete' book.slug %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>There are no authors to be displayed</p>
+    {% endif %}
+</div>
+
+{% endblock %}

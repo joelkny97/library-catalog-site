@@ -155,9 +155,9 @@ class Author(models.Model):
 		return '{0}, {1}'.format(self.firstname, self.lastname)
 
 	def save(self, *args, **kwargs):  # new
-		#super(Author,self).save(*args, **kwargs)  # Save your model in order to get the id
+		super(Author, self).save(*args, **kwargs)  # Save your model in order to get the id
 		if not self.slug:
-			self.slug = slugify(self.firstname,self.lastname)
+			# super(Author, self).save(*args, **kwargs)
+			slug_temp = self.firstname + "-" + self.lastname + "-" + str(self.pk)
+			self.slug = slugify(slug_temp)
 		return super().save(*args, **kwargs)
-
-
