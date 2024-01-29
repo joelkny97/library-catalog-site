@@ -1,0 +1,3 @@
+catalog/__pycache__/**
+locallibrary/__pycache__/**
+db.sqlite3
