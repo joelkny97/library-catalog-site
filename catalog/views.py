@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.db.models import Max, Count
 from django.views import generic
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from catalog.forms import RenewBookForm
+from django.contrib.auth import logout
 
 # Create your views here.
 from catalog.models import Book, BookInstance, Author, Genre, Language
@@ -30,8 +31,8 @@ def index(request):
     num_authors = Author.objects.all().count()
 
     #most borrowed books
-    max_book_count = BookInstance.objects.values('book__title').annotate(num_inst=Count('book__id')).order_by('-num_inst')[0]
     if BookInstance.objects.all().count() != 0:
+        max_book_count = BookInstance.objects.values('book__title').annotate(num_inst=Count('book__id')).order_by('-num_inst')[0]
         most_borrowed = max_book_count['book__title']
     else:
         most_borrowed = 'None'
@@ -55,7 +56,7 @@ def index(request):
 #class view to generate list view of all books
 class BookListView(LoginRequiredMixin,generic.ListView):
     login_url = '/accounts/login/'
-    redirect_url = 'catalog/'
+    redirect_field_name = 'catalog/'
     model = Book
     pagination = 10
     paginate_by = 2
@@ -74,14 +75,14 @@ class BookListView(LoginRequiredMixin,generic.ListView):
         return context
 class BookDetailView(LoginRequiredMixin,generic.DetailView):
     login_url = '/accounts/login/'
-    redirect_url = 'catalog/'
+    redirect_field_name = 'catalog/'
     model = Book
     template_name = 'catalog/book_detail.html'  # custom template file
 
 #class view to generate list view of all authors
 class AuthorListView(LoginRequiredMixin,generic.ListView):
     login_url = '/accounts/login/'
-    redirect_url = 'catalog/'
+    redirect_field_name = 'catalog/'
     model = Author
     # query_pk_and_slug = True
     pagination = 10
@@ -102,7 +103,7 @@ class AuthorListView(LoginRequiredMixin,generic.ListView):
 
 class AuthorDetailView(LoginRequiredMixin,generic.DetailView):
     login_url = '/accounts/login/'
-    redirect_url = 'catalog/'
+    redirect_field_name = 'catalog/'
     model = Author
     template_name = 'catalog/author_detail.html'
     #query_pk_and_slug = True  # calling pk and slug
@@ -158,8 +159,34 @@ def renew_book_librarian(request, pk):
     return render(request, 'catalog/book_renew_librarian.html', context)
 
 
+@permission_required('catalog.can_renew')
+def return_book_librarian(request, pk):
+    book_instance = get_object_or_404(BookInstance, pk=pk)
+
+    # If this is a POST request then process the Form data
+    if request.method == 'POST':
+
+
+    
+        book_instance.status = 'a'
+        book_instance.borrower = None
+        book_instance.save()
+
+        #redirect to new url after book is returned
+        return HttpResponseRedirect(reverse('users-borrowed'))
+
+
+    context = {
+        'book_instance': book_instance,
+    }
+
+    return render(request, 'catalog/book_return_librarian.html', context)
 
 
 
+def logout(request):
+    if request.method == 'POST':
 
+        logout(request)
+    return redirect('index')
 

@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from . import views
 
 urlpatterns = [
@@ -11,6 +11,8 @@ urlpatterns = [
     path('mybooks/', views.LoanBooksByUserListView.as_view(), name='my-borrowed'),
     path('loanedbooks/', views.LoanBooksByUserLibrariansListView.as_view(), name='users-borrowed'),
     path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),
+    path('book/<uuid:pk>/return/', views.return_book_librarian, name='return-book-librarian'),
+    path('accounts/', include("django.contrib.auth.urls") ),
 ]
 
 # path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),

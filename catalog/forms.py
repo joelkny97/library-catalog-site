@@ -4,7 +4,7 @@ from django.forms import ModelForm
 from catalog.models import BookInstance
 
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 class RenewBookForm(forms.Form):
     renewal_date = forms.DateField(help_text="Enter a date between now and 4 weeks (default 3).")
@@ -21,4 +21,3 @@ class RenewBookForm(forms.Form):
 
         #return cleaned data
         return data
-

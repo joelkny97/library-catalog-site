@@ -14,22 +14,31 @@
     <div id="sidebar-wrapper">
         {% block sidebar %}
         <nav class="nav flex-column grey lighten-4 py-4 font-weight-bold">
+            
             <ul class="sidebar-nav">
+                <li><div class="nav-link"> Time : <span id="clock"></span></div></li>
                 {% if user.is_authenticated %}
-                <li><a class="nav-link" href=" {% url 'index' %}">Home </a></li>
 
-                <li><a class="nav-link" href="{% url 'books' %}">All Books</a></li>
-                <li><a class="nav-link" href="{% url 'authors' %}">All Authors</a></li>
-                <li><p class="nav-link"> User: {{ user.get_username }}</p></li>
-                {% if perms.catalog.can_mark_returned %}
-                    <li><a class="nav-link" href="{% url 'users-borrowed' %}">User Borrowed books</a></li>
-                {% endif %}
-                <li><a class="nav-link" href="{% url 'my-borrowed' %}">My Borrowed books</a></li>
-                <li><a class="nav-link" href="{% url 'logout'%}">Logout</a></li>
+                    <li><a class="nav-link" href=" {% url 'index' %}">Home </a></li>
+
+                    <li><a class="nav-link" href="{% url 'books' %}">All Books</a></li>
+                    <li><a class="nav-link" href="{% url 'authors' %}">All Authors</a></li>
+                    <li><p class="nav-link"> User: {{ user.get_username }}</p></li>
+                    {% if perms.catalog.can_mark_returned %}
+                        <li><a class="nav-link" href="{% url 'users-borrowed' %}">User Borrowed books</a></li>
+                    {% endif %}
+                    <li><a class="nav-link" href="{% url 'my-borrowed' %}">My Borrowed books</a></li>
+                    
+                    <li>
+                        <form class = "nav-link" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                            <button type="submit">Logout</button>
+                        </form>
+                    </li>
                 {% else %}
-                <li><a class="nav-link"
-                       href="{% url 'login'%}?next={% if request.path == '/accounts/logout/' %}{% url 'index' %}{% else %}{{ request.path }}{% endif %}">Login</a>
-                </li>
+                    <li><a class="nav-link"
+                        href="{% url 'login'%}?next={% if request.path == '/accounts/logout/' %}{% url 'index' %}{% else %}{{ request.path }}{% endif %}">Login</a>
+                    </li>
                 {% endif %}
             </ul>
         </nav>
@@ -64,6 +73,8 @@
         </div>
     </div>
 </div>
+
+<script src="{% static 'js/script.js' %}"> </script>
 
 </body>
 </html>
